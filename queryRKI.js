@@ -28,51 +28,51 @@ https.get(urlrki, (resp) => {
   // The whole response has been received. Print out the result.
   resp.on('end', () => {
 	const csvo = convertHtmlToCsv(data);
-	console.log("TS = " + csvo.ts);
-	console.log("HEADLINE = " + csvo.headline);
-	console.log("CSV = " + csvo.csv);
+	console.log('TS = ' + csvo.ts);
+	console.log('HEADLINE = ' + csvo.headline);
+	console.log('CSV = ' + csvo.csv);
 
-    let fn = dirraw + "raw_" + csvo.ts + ".html";
+    let fn = dirraw + 'raw_' + csvo.ts + '.html';
     fs.writeFile(fn, data, function(err) {
 	    if(err) {
     	    return console.log(err);
     	}
-    	console.log("Raw html written to file " + fn + "!");
+    	console.log('Raw html written to file ' + fn + '!');
 	}); 
-	let fncsv = dircsv + "data_" + csvo.ts + ".csv";
-	fs.writeFile(fncsv, csvo.headline + "\n" + csvo.csv, function(err) {
+	let fncsv = dircsv + 'data_' + csvo.ts + '.csv';
+	fs.writeFile(fncsv, csvo.headline + '\n' + csvo.csv, function(err) {
 	    if(err) {
     	    return console.log(err);
     	}
-    	console.log("CSV data written to file " + fncsv + "!");
+    	console.log('CSV data written to file ' + fncsv + '!');
 	});
   });
 
-}).on("error", (err) => {
-  console.log("Error: " + err.message);
+}).on('error', (err) => {
+  console.log('Error: ' + err.message);
 });
 
 
 function convertHtmlToCsv(htmlData) {
 	let root = htmlp.parse(htmlData);
-	let main = root.querySelector("#main");
-	let tsmsg = main.querySelectorAll("p")[1].childNodes[0].rawText;
+	let main = root.querySelector('#main');
+	let tsmsg = main.querySelectorAll('p')[1].childNodes[0].rawText;
 	const result = {
 		ts: tsmsg.substring(7),
 		headline: tsmsg,
-		csv: ""
+		csv: ''
 	}
-	main.querySelector("tbody").querySelectorAll("tr").forEach(elem => {
-		let cols = elem.querySelectorAll("td");
-		let line = "";
+	main.querySelector('tbody').querySelectorAll('tr').forEach(elem => {
+		let cols = elem.querySelectorAll('td');
+		let line = '';
 		for (var ci = 0; ci < 5; ci++) {
 			let datanode = cols[ci].childNodes[0];
 			if (datanode != null && datanode.rawText != null)
-				line += datanode.rawText + ";";
+				line += datanode.rawText + ';';
 			else 
-				line += ";";		
+				line += ';';		
 		};
-		result.csv += line.substring(0, line.length - 1) + "\n";
+		result.csv += line.substring(0, line.length - 1) + '\n';
 	});
 	return result;
 }
@@ -87,5 +87,5 @@ function getFormattedTime() {
     var h = today.getHours();
     var mi = today.getMinutes();
     var s = today.getSeconds();
-    return y + "-" + m + "-" + d + "-" + h + "-" + mi + "-" + s;
+    return y + '-' + m + '-' + d + '-' + h + '-' + mi + '-' + s;
 }
