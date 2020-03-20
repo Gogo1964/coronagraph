@@ -4,7 +4,20 @@ const https = require('https');
 const fs = require('fs');
 const htmlp = require('node-html-parser');
 
-https.get('https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.html', (resp) => {
+var urlrki = 'https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.html';
+var dirraw = './raw/';
+var dircsv = './csv/';
+
+if (!fs.existsSync(dirraw)){
+    fs.mkdirSync(dirraw);
+}
+
+if (!fs.existsSync(dircsv)){
+    fs.mkdirSync(dircsv);
+}
+
+https.get(urlrki, (resp) => {
+
   let data = '';
 
   // A chunk of data has been received.
@@ -14,33 +27,20 @@ https.get('https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahl
 
   // The whole response has been received. Print out the result.
   resp.on('end', () => {
-	let root = htmlp.parse(data);
-	let main = root.querySelector("#main");
-	let tsmsg = main.querySelectorAll("p")[1].childNodes[0].rawText;
-	let ts = tsmsg.substring(7);
-	let csv = main.querySelectorAll("p")[1].childNodes[0].rawText + "\n";
-	main.querySelector("tbody").querySelectorAll("tr").forEach(elem => {
-		let cols = elem.querySelectorAll("td");
-		let line = "";
-		for (var ci = 0; ci < 5; ci++) {
-			let datanode = cols[ci].childNodes[0];
-			if (datanode != null && datanode.rawText != null)
-				line += datanode.rawText + ";";
-			else 
-				line += ";";		
-		};
-		csv += line.substring(0, line.length - 1) + "\n";
-	});
-	console.log(csv);
-    let fn = "./raw_" + ts + ".html";
+	const csvo = convertHtmlToCsv(data);
+	console.log("TS = " + csvo.ts);
+	console.log("HEADLINE = " + csvo.headline);
+	console.log("CSV = " + csvo.csv);
+
+    let fn = dirraw + "raw_" + csvo.ts + ".html";
     fs.writeFile(fn, data, function(err) {
 	    if(err) {
     	    return console.log(err);
     	}
     	console.log("Raw html written to file " + fn + "!");
 	}); 
-	let fncsv = "./data_" + ts + ".csv";
-	fs.writeFile(fncsv, csv, function(err) {
+	let fncsv = dircsv + "data_" + csvo.ts + ".csv";
+	fs.writeFile(fncsv, csvo.headline + "\n" + csvo.csv, function(err) {
 	    if(err) {
     	    return console.log(err);
     	}
@@ -51,6 +51,32 @@ https.get('https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahl
 }).on("error", (err) => {
   console.log("Error: " + err.message);
 });
+
+
+function convertHtmlToCsv(htmlData) {
+	let root = htmlp.parse(htmlData);
+	let main = root.querySelector("#main");
+	let tsmsg = main.querySelectorAll("p")[1].childNodes[0].rawText;
+	const result = {
+		ts: tsmsg.substring(7),
+		headline: tsmsg,
+		csv: ""
+	}
+	main.querySelector("tbody").querySelectorAll("tr").forEach(elem => {
+		let cols = elem.querySelectorAll("td");
+		let line = "";
+		for (var ci = 0; ci < 5; ci++) {
+			let datanode = cols[ci].childNodes[0];
+			if (datanode != null && datanode.rawText != null)
+				line += datanode.rawText + ";";
+			else 
+				line += ";";		
+		};
+		result.csv += line.substring(0, line.length - 1) + "\n";
+	});
+	return result;
+}
+
 
 function getFormattedTime() {
     var today = new Date();
