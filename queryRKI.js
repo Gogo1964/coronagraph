@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const https = require('https');
+const path = require('path');
 const fs = require('fs');
 const htmlp = require('node-html-parser');
 
@@ -15,6 +16,30 @@ if (!fs.existsSync(dirraw)){
 if (!fs.existsSync(dircsv)){
     fs.mkdirSync(dircsv);
 }
+
+//joining path of directory 
+const directoryPath = path.join(__dirname, dirraw);
+
+console.log(directoryPath);
+
+//passsing directoryPath and callback function
+fs.readdir(directoryPath, function (err, files) {
+    //handling error
+    if (err) {
+        console.log('Unable to scan directory: ' + err);
+	} 
+	else {
+		//listing all files using forEach
+		files.forEach(function (file) {
+			if (file.endsWith('.html')) { 
+				const csvo = convertHtmlToCsv(fs.readFileSync(path.join(directoryPath, file), 'utf-8'));
+				console.log('TS = ' + csvo.ts);
+				console.log('HEADLINE = ' + csvo.headline);
+				writeCSV(csvo);
+			}
+		});
+	}
+});
 
 https.get(urlrki, (resp) => {
 
@@ -31,6 +56,7 @@ https.get(urlrki, (resp) => {
 	console.log('TS = ' + csvo.ts);
 	console.log('HEADLINE = ' + csvo.headline);
 	console.log('CSV = ' + csvo.csv);
+	writeCSV(csvo);
 
     let fn = dirraw + 'raw_' + csvo.ts + '.html';
     fs.writeFile(fn, data, function(err) {
@@ -39,13 +65,6 @@ https.get(urlrki, (resp) => {
     	}
     	console.log('Raw html written to file ' + fn + '!');
 	}); 
-	let fncsv = dircsv + 'data_' + csvo.ts + '.csv';
-	fs.writeFile(fncsv, csvo.headline + '\n' + csvo.csv, function(err) {
-	    if(err) {
-    	    return console.log(err);
-    	}
-    	console.log('CSV data written to file ' + fncsv + '!');
-	});
   });
 
 }).on('error', (err) => {
@@ -56,7 +75,7 @@ https.get(urlrki, (resp) => {
 function convertHtmlToCsv(htmlData) {
 	let root = htmlp.parse(htmlData);
 	let main = root.querySelector('#main');
-	let tsmsg = main.querySelectorAll('p')[1].childNodes[0].rawText;
+	let tsmsg = main.querySelectorAll('p.null')[0].childNodes[0].rawText;
 	const result = {
 		ts: tsmsg.substring(7),
 		headline: tsmsg,
@@ -77,6 +96,15 @@ function convertHtmlToCsv(htmlData) {
 	return result;
 }
 
+function writeCSV(csvo) {
+	let fncsv = dircsv + 'data_' + csvo.ts + '.csv';
+	fs.writeFile(fncsv, csvo.headline + '\n' + csvo.csv, function(err) {
+	    if (err) {
+    	    return console.log(err);
+    	}
+    	console.log('CSV data written to file ' + fncsv + '!');
+	});
+}
 
 function getFormattedTime() {
     var today = new Date();
