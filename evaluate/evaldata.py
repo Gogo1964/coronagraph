@@ -4,6 +4,7 @@ Evaluation of Corona data from RKI
 """
 
 import os
+import sys
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
@@ -22,9 +23,16 @@ def convert(fnamesrc, fnamedest):
     df = pd.read_csv(fnamesrc, sep=';',  header=0, names=colnames, thousands='.', decimal=',')
     df.to_csv(fnamedest, sep=';')
    
+    
 srcPath = '../csv'
 destPath = '../ucsv'
+
+if len(sys.argv) > 1:
+    srcPath = sys.argv[1]
     
+if len(sys.argv) > 2:
+    destPath = sys.argv[2]
+
 if not os.path.exists(destPath):
     os.mkdir(destPath)    
     
