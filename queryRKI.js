@@ -75,10 +75,17 @@ https.get(urlrki, (resp) => {
 function convertHtmlToCsv(htmlData) {
 	let root = htmlp.parse(htmlData);
 	let main = root.querySelector('#main');
-	let tsmsg = main.querySelectorAll('p.null')[0].childNodes[0].rawText;
+	let psel = main.querySelectorAll('p');
+	for (var pi = 0; pi < psel.length; pi++) {
+		if (psel[pi].rawText.substring(0, 5) == 'Stand')
+		{
+			console.log(psel[pi].rawText);
+			break;
+		}
+	}
 	const result = {
-		ts: tsmsg.substring(7),
-		headline: tsmsg,
+		ts: psel[pi].rawText.substring(7),
+		headline: psel[pi].rawText,
 		csv: ''
 	}
 	main.querySelector('tbody').querySelectorAll('tr').forEach(elem => {
