@@ -23,32 +23,32 @@ def convert(fnamesrc, fnamedest):
     df = pd.read_csv(fnamesrc, sep=';',  header=0, names=colnames, thousands='.', decimal=',')
     df.to_csv(fnamedest, sep=';')
    
+if __name__ == '__main__':    
+    srcPath = '../csv'
+    destPath = '../ucsv'
     
-srcPath = '../csv'
-destPath = '../ucsv'
-
-if len(sys.argv) > 1:
-    srcPath = sys.argv[1]
+    if len(sys.argv) > 1:
+        srcPath = sys.argv[1]
+        
+    if len(sys.argv) > 2:
+        destPath = sys.argv[2]
     
-if len(sys.argv) > 2:
-    destPath = sys.argv[2]
-
-if not os.path.exists(destPath):
-    os.mkdir(destPath)    
-    
-for filename in os.listdir(srcPath):
-    if filename.endswith('.csv'):
-        convert(os.path.join(srcPath, filename), os.path.join(destPath, convertFilename(filename)))
-        continue
-    else:
-        continue
+    if not os.path.exists(destPath):
+        os.mkdir(destPath)    
+        
+    for filename in os.listdir(srcPath):
+        if filename.endswith('.csv'):
+            convert(os.path.join(srcPath, filename), os.path.join(destPath, convertFilename(filename)))
+            continue
+        else:
+            continue
     
    
 
-"""    
-model = LinearRegression()
-model.fit([[10], [20], [30]], [-5, 10, 25])
-print(model.coef_)
-print(model.intercept_)
-print(model.predict([[0]]))
-"""
+    """    
+    model = LinearRegression()
+    model.fit([[10], [20], [30]], [-5, 10, 25])
+    print(model.coef_)
+    print(model.intercept_)
+    print(model.predict([[0]]))
+    """
